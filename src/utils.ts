@@ -123,22 +123,26 @@ export function getChartBasePath(fileName: string): string | undefined {
         return undefined;
     }
 
-    let possiblePathToChartDirectory = path.dirname(fileName);
+    let pathToChartDirectory;
     const dirs = ['templates', 'charts', 'crds'];
-    for (const dir of dirs) {
-        const lastIndexOf = possiblePathToChartDirectory.lastIndexOf(path.sep + dir);
-        if(lastIndexOf !== -1) {
-            possiblePathToChartDirectory = possiblePathToChartDirectory.substr(0, lastIndexOf);
-            break;
-        }    
-    }
-
-    const currentFilesInDir = fs.readdirSync(possiblePathToChartDirectory);
-    if (!currentFilesInDir.includes("Chart.yaml")) {
-        return undefined;
-    } 
+	while (fileName != path.sep) {
+		let possiblePathToChartDirectory = path.dirname(fileName);
+		for (const dir of dirs) {
+			const lastIndexOf = possiblePathToChartDirectory.lastIndexOf(path.sep + dir);
+			if(lastIndexOf !== -1) {
+				possiblePathToChartDirectory = possiblePathToChartDirectory.substr(0, lastIndexOf);
+				break;
+			}    
+		}
+		const currentFilesInDir = fs.readdirSync(possiblePathToChartDirectory);
+		if (!currentFilesInDir.includes("Chart.yaml")) {
+			break;
+		}
+		pathToChartDirectory = possiblePathToChartDirectory;
+		fileName = possiblePathToChartDirectory;
+	}
     
-    return possiblePathToChartDirectory;
+    return pathToChartDirectory;
 }
 
 export function getNameOfChart(filePath: string): string {
